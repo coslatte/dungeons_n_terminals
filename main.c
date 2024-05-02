@@ -4,6 +4,8 @@
 #include <windows.h>
 #include <string.h>
 
+#include "combat.h"
+
 const char ROAD = 0;     // Los caminos son representados con espacios vacíos ' ', y tienen valor 0 en el mapa.
 const char WALL = 1;     // Las paredes son representadas con 'X', y tienen valor 1 en el mapa.
 const char ENEMY = 2;    // Los enemigos se representan con la letra 'E', y tienen valor 2 en el mapa.
@@ -31,7 +33,7 @@ char map[8][8] = {
  * @param entity_type
  * Tipo de la entidad a definir. Si no es un tipo conocido, se muestra un mensaje en la consola y se cierra la aplicación.
  */
-void set_entity(int n, int m, char entity_type)
+void set_entity(int n, int m, char entity_type, int health)
 {
     if (map[n][m] != WALL)
     {
@@ -166,6 +168,8 @@ int *get_hero_position()
  * @param direction De acuerdo a su valor (1: arriba, 2: abajo, 3: izq, 4: der) se verifica si existe colisión o no.
  *
  * @return Devuelve `true` si existe colisión en la dirección indicada, `false` si no existe.
+ * Un caso particular que agrego es que si la colisión es con un enemigo, se inica entonces un combate.
+ * Por lo tanto, ojo, el valor de retorno se ajusta no a un booleano, sino a un `int` de valor `2`.
  */
 bool __check_collision(char direction)
 {
@@ -190,20 +194,45 @@ bool __check_collision(char direction)
     }
     else
     {
+        // Verificando por colisión con paredes y enemigos.
         switch (direction)
         {
         case 1:
-            return (map[hero_position[0] - 1][hero_position[1]] == WALL) ? true : false;
-            break;
+            if (map[hero_position[0] - 1][hero_position[1]] == WALL)
+            {
+                if (map[hero_position[0] - 1][hero_position[1]] == ENEMY)
+                    return 2;
+                return true;
+            }
+            else
+                return false;
         case 2:
-            return (map[hero_position[0] + 1][hero_position[1]] == WALL) ? true : false;
-            break;
+            if (map[hero_position[0] + 1][hero_position[1]] == WALL)
+            {
+                if (map[hero_position[0] + 1][hero_position[1]] == ENEMY)
+                    return 2;
+                return true;
+            }
+            else
+                return false;
         case 3:
-            return (map[hero_position[0]][hero_position[1] - 1] == WALL) ? true : false;
-            break;
+            if (map[hero_position[0]][hero_position[1] - 1] == WALL)
+            {
+                if (map[hero_position[0]][hero_position[1] - 1] == ENEMY)
+                    return 2;
+                return true;
+            }
+            else
+                return false;
         case 4:
-            return (map[hero_position[0]][hero_position[1] + 1] == WALL) ? true : false;
-            break;
+            if (map[hero_position[0]][hero_position[1] + 1] == WALL)
+            {
+                if (map[hero_position[0]][hero_position[1] + 1] == ENEMY)
+                    return 2;
+                return true;
+            }
+            else
+                return false;
         default:
             return true;
             break;
@@ -224,10 +253,14 @@ void _move_hero_up()
         update_entity_position(hero_pos[0], hero_pos[1], hero_pos[0] - 1, hero_pos[1], 3);
         free(hero_pos);
     }
+    else if (__check_collision(1) == 2)
+    {
+        start_combat();
+    }
     else
     {
         printf("Colision ARRIBA.\n");
-        Sleep(1500);
+        Sleep(500);
     }
 }
 
@@ -248,7 +281,7 @@ void _move_hero_down()
     else
     {
         printf("Colision ABAJO.\n");
-        Sleep(1500);
+        Sleep(500);
     }
 }
 
@@ -257,7 +290,7 @@ void _move_hero_down()
  */
 void _move_hero_left()
 {
-    // 1: arriba, 2: abajo, 3: izq, 4: der
+    // 1: arriba, 2: abajo, 3: izq, 4:
     if (!__check_collision(3))
     {
         int *hero_pos = get_hero_position();
@@ -267,7 +300,7 @@ void _move_hero_left()
     else
     {
         printf("Colision IZQUIERDA.\n");
-        Sleep(1500);
+        Sleep(500);
     }
 }
 
@@ -286,7 +319,7 @@ void _move_hero_right()
     else
     {
         printf("Colision DERECHA.\n");
-        Sleep(1500);
+        Sleep(500);
     }
 }
 
@@ -358,9 +391,9 @@ char get_operation()
  */
 int main()
 {
-    set_entity(7, 6, 3); // Héroe.
-    set_entity(6, 3, 2); // Enemigo.
-    set_entity(3, 6, 2); // Enemigo.
+    set_entity(7, 6, 3, 50); // Héroe.
+    set_entity(6, 3, 2, 50); // Enemigo.
+    set_entity(3, 6, 2, 50); // Enemigo.
 
     char operation;
     for (;;)

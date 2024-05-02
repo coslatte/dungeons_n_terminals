@@ -58,7 +58,8 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "stdio.h": "c",
-    "functional": "c"
+    "functional": "c",
+    "combat.h": "c"
   },
   "cmake.sourceDirectory": "D:/Coding/Projects/C/dungeon_n_terminal"
 }
