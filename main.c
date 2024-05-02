@@ -1,10 +1,11 @@
+#include "combat.h"
+#include "animations.h"
+
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <windows.h>
 #include <string.h>
-
-#include "combat.h"
 
 const char ROAD = 0;     // Los caminos son representados con espacios vacíos ' ', y tienen valor 0 en el mapa.
 const char WALL = 1;     // Las paredes son representadas con 'X', y tienen valor 1 en el mapa.
@@ -118,7 +119,7 @@ void render_dungeon()
  *
  * @return `true` si se encuentra el héroe, `false` en caso contrario.
  */
-bool hero_exist()
+int hero_exist()
 {
     for (size_t i = 0; i < 8; i++)
         for (size_t j = 0; j < 8; j++)
@@ -171,7 +172,7 @@ int *get_hero_position()
  * Un caso particular que agrego es que si la colisión es con un enemigo, se inica entonces un combate.
  * Por lo tanto, ojo, el valor de retorno se ajusta no a un booleano, sino a un `int` de valor `2`.
  */
-bool __check_collision(char direction)
+int __check_collision(char direction)
 {
     // 1: arriba, 2: abajo, 3: izq, 4: der
     /*
@@ -199,46 +200,93 @@ bool __check_collision(char direction)
         {
         case 1:
             if (map[hero_position[0] - 1][hero_position[1]] == WALL)
-            {
-                if (map[hero_position[0] - 1][hero_position[1]] == ENEMY)
-                    return 2;
                 return true;
-            }
+            else if (map[hero_position[0] - 1][hero_position[1]] == ENEMY)
+                return 2;
             else
-                return false;
+                return 0;
         case 2:
             if (map[hero_position[0] + 1][hero_position[1]] == WALL)
-            {
-                if (map[hero_position[0] + 1][hero_position[1]] == ENEMY)
-                    return 2;
                 return true;
-            }
+            else if (map[hero_position[0] + 1][hero_position[1]] == ENEMY)
+                return 2;
             else
-                return false;
+                return 0;
         case 3:
             if (map[hero_position[0]][hero_position[1] - 1] == WALL)
-            {
-                if (map[hero_position[0]][hero_position[1] - 1] == ENEMY)
-                    return 2;
                 return true;
-            }
+            else if (map[hero_position[0]][hero_position[1] - 1] == ENEMY)
+                return 2;
             else
-                return false;
+                return 0;
         case 4:
             if (map[hero_position[0]][hero_position[1] + 1] == WALL)
-            {
-                if (map[hero_position[0]][hero_position[1] + 1] == ENEMY)
-                    return 2;
                 return true;
-            }
+            else if (map[hero_position[0]][hero_position[1] + 1] == ENEMY)
+                return 2;
             else
-                return false;
+                return 0;
         default:
             return true;
             break;
         }
     }
     free(hero_position);
+}
+
+/**
+ * Configura las particularidades del combate. Cuando se lanza el flag de que se acabó el combate,
+ * volvemos al tablero del dungeon: es básicamente el propósito de este método.
+ *
+ * @param enemy_pos
+ * Es la orientación de se encuentra el enemigo. `1`: Arriba, `2`: Abajo, `3`: Izquierda, `4`: Derecha.
+ */
+void combat_set(int enemy_pos)
+{
+    animation_starting_combat();
+
+    /*
+     * Razón porque start_combat() está en este condicional es porque
+     * necesito saber cuándo se finaliza el combate para contectar con esta 'clase' principal
+     * desde la 'clase' combat.c.
+     */
+    if (start_combat()) // Se inicia el combate, y cuando termina se activa este condicional
+    {
+        if (hero_exist())
+        {
+            int *hero_pos = get_hero_position();
+            switch (enemy_pos)
+            {
+            case 1:
+                update_entity_position(hero_pos[0] - 1, hero_pos[1], hero_pos[0] - 1, hero_pos[1], ROAD);
+                break;
+            case 2:
+                update_entity_position(hero_pos[0] + 1, hero_pos[1], hero_pos[0] + 1, hero_pos[1], ROAD);
+                break;
+            case 3:
+                update_entity_position(hero_pos[0], hero_pos[1] - 1, hero_pos[0], hero_pos[1] - 1, ROAD);
+                break;
+            case 4:
+                update_entity_position(hero_pos[0], hero_pos[1] + 1, hero_pos[0], hero_pos[1] + 1, ROAD);
+                break;
+            default:
+                break;
+            }
+            free(hero_pos);
+            render_dungeon();
+        }
+        else
+        {
+            printf("No se encontró el heroe.\n");
+            Sleep(1000);
+        }
+    }
+    else
+    {
+        printf("Error al realizar el combate.\n");
+        exit(EXIT_FAILURE);
+        Sleep(1000);
+    }
 }
 
 /**
@@ -255,7 +303,7 @@ void _move_hero_up()
     }
     else if (__check_collision(1) == 2)
     {
-        start_combat();
+        combat_set(1);
     }
     else
     {
@@ -278,6 +326,10 @@ void _move_hero_down()
         update_entity_position(hero_pos[0], hero_pos[1], hero_pos[0] + 1, hero_pos[1], 3);
         free(hero_pos);
     }
+    else if (__check_collision(2) == 2)
+    {
+        combat_set(2);
+    }
     else
     {
         printf("Colision ABAJO.\n");
@@ -297,6 +349,10 @@ void _move_hero_left()
         update_entity_position(hero_pos[0], hero_pos[1], hero_pos[0], hero_pos[1] - 1, 3);
         free(hero_pos);
     }
+    else if (__check_collision(3) == 2)
+    {
+        combat_set(3);
+    }
     else
     {
         printf("Colision IZQUIERDA.\n");
@@ -315,6 +371,10 @@ void _move_hero_right()
         int *hero_pos = get_hero_position();
         update_entity_position(hero_pos[0], hero_pos[1], hero_pos[0], hero_pos[1] + 1, 3);
         free(hero_pos);
+    }
+    else if (__check_collision(4) == 2)
+    {
+        combat_set(4);
     }
     else
     {
@@ -406,7 +466,6 @@ int main()
         action(operation);
         system("cls");
     }
-    printf("Se termino el programa.");
     Sleep(5000);
-    return 0;
+    return EXIT_SUCCESS;
 }
