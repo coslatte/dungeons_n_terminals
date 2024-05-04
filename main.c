@@ -1,5 +1,6 @@
 #include "combat.h"
 #include "animations.h"
+#include "functions.h"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -85,7 +86,7 @@ char translate(char character)
         return ' ';
         break;
     case 1:
-        return 'X';
+        return '#';
         break;
     case 2:
         return 'E';
@@ -243,50 +244,40 @@ int __check_collision(char direction)
  */
 void combat_set(int enemy_pos)
 {
-    animation_starting_combat();
+    // animation_starting_combat();
 
     /*
      * Razón porque start_combat() está en este condicional es porque
      * necesito saber cuándo se finaliza el combate para contectar con esta 'clase' principal
      * desde la 'clase' combat.c.
      */
-    if (start_combat()) // Se inicia el combate, y cuando termina se activa este condicional
+    if (start_combat() == 1) // Se inicia el combate, y cuando termina se activa este condicional
     {
-        if (hero_exist())
+        int *hero_pos = get_hero_position();
+        switch (enemy_pos)
         {
-            int *hero_pos = get_hero_position();
-            switch (enemy_pos)
-            {
-            case 1:
-                update_entity_position(hero_pos[0] - 1, hero_pos[1], hero_pos[0] - 1, hero_pos[1], ROAD);
-                break;
-            case 2:
-                update_entity_position(hero_pos[0] + 1, hero_pos[1], hero_pos[0] + 1, hero_pos[1], ROAD);
-                break;
-            case 3:
-                update_entity_position(hero_pos[0], hero_pos[1] - 1, hero_pos[0], hero_pos[1] - 1, ROAD);
-                break;
-            case 4:
-                update_entity_position(hero_pos[0], hero_pos[1] + 1, hero_pos[0], hero_pos[1] + 1, ROAD);
-                break;
-            default:
-                break;
-            }
-            free(hero_pos);
-            render_dungeon();
+        case 1:
+            update_entity_position(hero_pos[0] - 1, hero_pos[1], hero_pos[0] - 1, hero_pos[1], ROAD);
+            break;
+        case 2:
+            update_entity_position(hero_pos[0] + 1, hero_pos[1], hero_pos[0] + 1, hero_pos[1], ROAD);
+            break;
+        case 3:
+            update_entity_position(hero_pos[0], hero_pos[1] - 1, hero_pos[0], hero_pos[1] - 1, ROAD);
+            break;
+        case 4:
+            update_entity_position(hero_pos[0], hero_pos[1] + 1, hero_pos[0], hero_pos[1] + 1, ROAD);
+            break;
+        default:
+            printf("Error con la posición del heroe...");
+            Sleep(5000);
+            exit(EXIT_FAILURE);
         }
-        else
-        {
-            printf("No se encontró el heroe.\n");
-            Sleep(1000);
-        }
+        free(hero_pos);
+        render_dungeon();
     }
-    else
-    {
-        printf("Error al realizar el combate.\n");
-        exit(EXIT_FAILURE);
-        Sleep(1000);
-    }
+    else if (start_combat())
+        render_dungeon();
 }
 
 /**
@@ -436,17 +427,6 @@ void action(char operation)
 }
 
 /**
- * Para entrada de instrucciones por consola.
- * Básicamente el medio de interacción con el juego.
- */
-char get_operation()
-{
-    char buf[100];
-    scanf("%c", buf);
-    return buf[0];
-}
-
-/**
  * Funcion principal del juego.
  */
 int main()
@@ -462,7 +442,7 @@ int main()
         printf("\n");
         render_dungeon();
         printf("Accion: ");
-        operation = get_operation();
+        operation = read_console();
         action(operation);
         system("cls");
     }

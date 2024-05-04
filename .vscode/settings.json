@@ -61,7 +61,8 @@
     "functional": "c",
     "combat.h": "c",
     "string.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "stdbool.h": "c"
   },
   "cmake.sourceDirectory": "D:/Coding/Projects/C/dungeon_n_terminal"
 }

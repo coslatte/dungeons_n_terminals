@@ -1,4 +1,5 @@
 #include "combat.h"
+#include "functions.h"
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -8,32 +9,144 @@
 
 Combat combat;
 bool fighting;
+bool can_run = true;
+bool bro_really_said_run = false;
+int funny_counter = 0;
+int static_hero_health = 100;
 
-Combat create_combat(int hero_health, int enemy_health)
+Combat create_combat(int enemy_health)
 {
-    Combat combat = {.hero_health = hero_health, .enemy_health = enemy_health};
     fighting = true;
+    Combat combat = {.hero_health = static_hero_health, .enemy_health = enemy_health};
     return combat;
 }
 
 int start_combat()
 {
-    combat = create_combat(50, 50);
+    combat = create_combat(50);
 
-    fighting = true;
-
-    while (fighting)
+    do
     {
-        render_screen();
-        char input = getchar(); // 'Q': Atacar, 'R': Escapar
-        if (input == 'q' || input == 'r')
-            input -= 32;
+        render_combat_screen();
+        show_choise_msg();             // Simplemente para mostrar en pantalla que debe tomar una decisión.
+        take_decision(read_console()); // Paso sumamente importante acá!
+        if (!fighting)                 // Si se acabó el combate y se devuelve 1.
+            return 1;
+        if (bro_really_said_run) // Caso si el heroe huye. Se devuelve 2.
+            return 2;
+    } while (fighting || !bro_really_said_run); // Combate dudará hasta que se rompa el ciclo.
+}
+
+void take_decision(char decision)
+{
+    srand(time(NULL));                      // Inicialización de una semilla con la hora actual.
+    int random_dmg_hero = 5 + rand() % 41;  // Daño en el rango de `5 < dmg < 45`.
+    int random_dmg_enemy = 5 + rand() % 41; // Daño en el rango de `5 < dmg < 45`.
+    if (decision == 'q' || decision == 'r')
+        decision -= 32;
+    switch (decision)
+    {
+    case 'Q':
+        hero_attacks_enemy(random_dmg_hero); // El héroe ataca al enemigo.
+        if (!fighting)
+            return;
+        enemy_attacks_hero(random_dmg_enemy); // Enemigo ataca al héroe.
+        break;
+    case 'R':
+        if (can_run == false)
+            switch (funny_counter)
+            {
+            case 0:
+                printf("Na en serio creias que podias huir? xd.\n");
+                funny_counter++;
+                Sleep(2500);
+                break;
+            case 1:
+                printf("No se puede huir.\n");
+                funny_counter++;
+                Sleep(2500);
+                break;
+            case 2:
+                printf("XD\n");
+                Sleep(2500);
+                break;
+            default:
+                break;
+            }
         else
-            continue;
-        take_decision(input);
+            hero_try_run();
+        break;
+    case '*':
+        printf("papa que haces...\n");
+        break;
+    default:
+        break;
     }
-    Sleep(100);
-    return 1;
+}
+
+void hero_attacks_enemy(int damage)
+{
+    if (damage > combat.enemy_health)
+    {
+        combat.enemy_health = 0;
+        printf("Combate finalizado: Heroe mato a enemigo.\n");
+        fighting = false;
+        Sleep(2500);
+        return;
+    }
+    else
+    {
+        printf("HEROE ataca -> ENEMIGO. %d puntos de damage.\n", damage);
+        combat.enemy_health -= damage;
+        Sleep(2500);
+    }
+}
+
+void enemy_attacks_hero(int damage)
+{
+    if (damage > static_hero_health)
+    {
+        static_hero_health = 0;
+        system("cls");
+        printf("Combate finalizado: Enemigo mato al heroe.\n");
+        system("cls");
+        printf("Fin del Juego.\n");
+        Sleep(5000);
+        exit(0);
+    }
+    else
+    {
+        printf("ENEMIGO ataca -> HEROE. %d puntos de damage.\n", damage);
+        static_hero_health -= damage;
+        Sleep(2500);
+    }
+}
+
+void hero_try_run()
+{
+    srand(time(NULL));         // Inicialización de una semilla con la hora actual.
+    int chance = rand() % 101; // Probabilidad de huir en el rango de `0 < chance < 100`.
+    if ((rand() % 101) > chance)
+    {
+        printf("El heroe ha logrado escapar del combate.\n");
+        bro_really_said_run = true;
+        Sleep(2500);
+    }
+    else
+    {
+        printf("Cagaste... no se pudo escapar... O_o\n");
+        can_run = false;
+        Sleep(2500);
+    }
+}
+
+void render_combat_screen()
+{
+    system("cls");
+    show_image();
+    show_options();
+    show_hero_health();
+    show_enemy_health();
 }
 
 void show_image()
@@ -75,105 +188,20 @@ void show_image()
 
 void show_options()
 {
-    printf(
-        "--- Opciones disponibles ---\n"
-        "Atacar:      Q              \n"
-        "Retirarse:   R              \n");
-}
-
-void show_enemy_health()
-{
-    printf("Vida del enemigo: %d\n", combat.enemy_health);
-}
-
-void show_hero_health()
-{
-    printf("Vida del heroe: %d\n", combat.hero_health);
-}
-
-void hero_runs()
-{
-    printf("El heroe ha escapado del combate.\n");
-    Sleep(1000);
-    end_combat();
-}
-
-int take_decision(char decision)
-{
-    srand(time(NULL));                      // Inicialización de una semilla con la hora actual.
-    int random_dmg_hero = 5 + rand() % 41;  // Daño en el rango de `5 < dmg < 45`.
-    int random_dmg_enemy = 5 + rand() % 41; // Daño en el rango de `5 < dmg < 45`.
-    switch (decision)
-    {
-    case 'Q':
-        hero_attacks_enemy(random_dmg_hero);
-        if (combat.enemy_health > 0)
-            enemy_attacks_hero(random_dmg_enemy);
-        Sleep(500);
-        return 1;
-    case 'R':
-        hero_runs();
-        return 2;
-    default:
-        exit(EXIT_FAILURE);
-    }
-}
-
-void hero_attacks_enemy(int damage)
-{
-    if (damage > combat.enemy_health)
-    {
-        printf("Combate finalizado: Heroe mato a enemigo.\n");
-        Sleep(1500);
-        combat.enemy_health = 0;
-        end_combat();
-    }
+    if (can_run)
+        printf(
+            "--- Opciones disponibles ---\n"
+            "Atacar:      Q              \n"
+            "Retirarse:   R              \n");
     else
-    {
-        printf("Heroe ataco a enemigo realizando %d puntos de damage.\n", damage);
-        Sleep(1500);
-        combat.enemy_health -= damage;
-    }
+        printf(
+            "--- Opciones disponibles ---\n"
+            "Atacar:      Q              \n"
+            "xxxxxxxxx:   *              \n");
 }
 
-void enemy_attacks_hero(int damage)
-{
-    if (damage > combat.hero_health)
-    {
-        printf("Combate finalizado: Enemigo mato al heroe.");
-        combat.hero_health = 0;
-        printf("f");
-        Sleep(1000);
-        system("cls");
-        printf("perdiste");
-        Sleep(1000);
-        system("cls");
-        printf("que fula...");
-        Sleep(350);
-        system("cls");
-        Sleep(300);
-        printf("GAME OVER");
-        Sleep(3000);
-        system("cls");
-        end_combat();
-    }
-    else
-    {
-        printf("Enemigo ataco a heroe realizando %d puntos de damage.\n", damage);
-        combat.hero_health -= damage;
-    }
-}
+void show_enemy_health() { printf("Vida del ENEMIGO: %d\n", combat.enemy_health); }
 
-void render_screen()
-{
-    system("cls");
-    show_image();
-    show_options();
-    show_hero_health();
-    show_enemy_health();
-}
+void show_hero_health() { printf("Vida del HEROE:   %d\n", static_hero_health); }
 
-void end_combat()
-{
-    fighting = false;
-}
+void show_choise_msg() { printf(">>> Tome una decision: "); }

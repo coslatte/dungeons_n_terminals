@@ -10,12 +10,11 @@ typedef struct Combat
 } Combat;
 
 /**
- * Crea un `Combat` definiendo la vida del enemigo y la del héroe.
+ * Crea un `Combat` definiendo la vida del enemigo.
  *
  * @param enemy_health Vida del enemigo.
- * @param hero_health Vida del héroe.
  */
-Combat create_combat(int enemy_health, int hero_health);
+void create_combat(int enemy_health);
 
 /**
  * Inicia un combate. Crea un campo `Combat` que se almacena en memoria.
@@ -51,7 +50,7 @@ void show_enemy_health();
  * `Q` = Atacar. `R` = Escapar.
  * @returns `1` si el usuario decide atacar, `2` si decide escapar.
  */
-int take_decision(char decision);
+void take_decision(char decision);
 
 /**
  * Hace que el héroe disminuya la vida del enemigo en `damage` número.
@@ -72,13 +71,14 @@ void enemy_attacks_hero(int damage);
 /**
  * Se encarga de renderizar las imagenes del combate.
  */
-void render_screen();
+void render_combat_screen();
 
 /**
  * Función para expresar que el Héroe ha escapado de la batalla.
  */
-void hero_runs();
+void hero_try_run();
+
 /**
- * Pone fin al combate.
+ * Muestra al jugador un mensaje que indica que debe tomar una decisión.
  */
-void end_combat();
+void show_choise_msg();
