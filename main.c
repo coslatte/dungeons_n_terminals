@@ -14,6 +14,8 @@ const char ENEMY = 2;    // Los enemigos se representan con la letra 'E', y tien
 const char HERO = 3;     // El héroe se representa con la letra 'H', y tienen valor 3 en el mapa.
 const char UNKNOWN = -1; // Valor que se asigna a un tipo de entidad desconocido.
 
+const bool do_i_even_have_an_intro_or_smth = true;
+
 // Mapa 1.
 char map[8][8] = {
     {1, 0, 1, 1, 1, 1, 1, 1},
@@ -431,6 +433,9 @@ void action(char operation)
  */
 int main()
 {
+    if (do_i_even_have_an_intro_or_smth)
+        game_text_intro();
+
     set_entity(7, 6, 3, 50); // Héroe.
     set_entity(6, 3, 2, 50); // Enemigo.
     set_entity(3, 6, 2, 50); // Enemigo.
@@ -444,6 +449,8 @@ int main()
         printf("Accion: ");
         operation = read_console();
         action(operation);
+        if (!hero_exist())
+            exit(0);
         system("cls");
     }
     Sleep(5000);

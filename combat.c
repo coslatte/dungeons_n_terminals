@@ -86,6 +86,7 @@ void take_decision(char decision)
         break;
     case '*':
         printf("papa que haces...\n");
+        Sleep(2000);
         break;
     default:
         break;
@@ -117,8 +118,12 @@ void enemy_attacks_hero(int damage)
         static_hero_health = 0;
         system("cls");
         printf("Combate finalizado: Enemigo mato al heroe.\n");
+        Sleep(2500);
         system("cls");
-        printf("Fin del Juego.\n");
+        printf("f...\n");
+        Sleep(2500);
+        system("cls");
+        printf("Game Over\n");
         Sleep(5000);
         exit(0);
     }
