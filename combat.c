@@ -54,6 +54,7 @@ void take_decision(char decision)
         break;
     case 'R':
         if (can_run == false)
+        {
             switch (funny_counter)
             {
             case 0:
@@ -62,17 +63,24 @@ void take_decision(char decision)
                 Sleep(2500);
                 break;
             case 1:
-                printf("No se puede huir.\n");
+                printf("No puedes huir.\n");
                 funny_counter++;
                 Sleep(2500);
                 break;
             case 2:
                 printf("XD\n");
                 Sleep(2500);
+                funny_counter++;
+                break;
+            case 3:
+                printf("No puedes huir.\n");
+                Sleep(2500);
                 break;
             default:
                 break;
             }
+            enemy_attacks_hero(random_dmg_enemy); // Enemigo ataca al héroe.
+        }
         else
             hero_try_run();
         break;

@@ -14,7 +14,7 @@ typedef struct Combat
  *
  * @param enemy_health Vida del enemigo.
  */
-void create_combat(int enemy_health);
+Combat create_combat(int enemy_health);
 
 /**
  * Inicia un combate. Crea un campo `Combat` que se almacena en memoria.
