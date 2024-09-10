@@ -1,5 +1,5 @@
 ## Important
-Gotta mention that, of course for run of this code its important to install the GNU Linux C/C++ compiler (MinGW).
+Gotta mention that for the run of this code it's necesary to install the GNU Linux C/C++ compiler (MinGW) in order to compile the game.
 Run the command: `gcc main.c combat.c functions.c animations.c -o game.exe` to compile into an executable file.
 
 ## Update after a while
