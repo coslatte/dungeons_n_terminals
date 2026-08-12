@@ -14,6 +14,9 @@ I can't even understand how I made this, so proud of myself haha. Well made, fun
 
 Btw, I added a `game.exe` compiled file, if you can't compile it. Remember, _gcc_ and stuff have to be installed.
 
+## new thoughts on the stuff, August 12, 2026
+Reading the previous stuff looks like I was a lot excited, and not gonna like, cringe. But it's really cool that, at that time I didn't vibecoded this proyect, I just made some questions to llm's for memory allocations and read some docs, which was really fun at the time. Cool job for getting the basics of C.
+
 ## Screenshot
 
 ![game_screenshot](assets/game_screenshot.jpg)
